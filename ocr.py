@@ -4,14 +4,11 @@ from PIL import Image
 import streamlit as st
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
-# Load the processor and model
 processor = TrOCRProcessor.from_pretrained('microsoft/trocr-base-printed')
 model = VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-base-printed')
 
-# Enhanced preprocessing function
 def preprocess_image(image):
     try:
-        # Convert PIL image to numpy array
         image = np.array(image)
         st.write(f"Original image shape: {image.shape}")
 
@@ -27,18 +24,17 @@ def preprocess_image(image):
         gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         st.write(f"Image shape after conversion to grayscale: {gray_image.shape}")
 
-        # Apply GaussianBlur to reduce noise
+        # nosie reduction
         blurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
 
-        # Apply thresholding to get binary image
+        # threshold to get binary image
         _, binary_image = cv2.threshold(blurred_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         st.write(f"Image shape after thresholding: {binary_image.shape}")
 
-        # Perform morphological operations to remove small noises
         kernel = np.ones((3, 3), np.uint8)
         binary_image = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, kernel)
 
-        # Optionally, apply dilation and erosion to enhance text features
+        #dilation and erosion to enhance text features
         binary_image = cv2.dilate(binary_image, kernel, iterations=1)
         binary_image = cv2.erode(binary_image, kernel, iterations=1)
 
@@ -65,7 +61,7 @@ def extract_text_from_image(image):
         st.error(f"Error in extracting text from image: {e}")
         return None
 
-# Main function for the Streamlit app
+# Streamlit app
 def main():
     st.title("CAPTCHA Text Extractor")
     uploaded_file = st.file_uploader("Choose a CAPTCHA image...", type=["jpg", "jpeg", "png"])
