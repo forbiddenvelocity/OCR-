@@ -50,7 +50,6 @@ def preprocess_image(image):
         st.error(f"Error in preprocessing image: {e}")
         return None
 
-# Function to extract text from image using the OCR model
 def extract_text_from_image(image):
     try:
         pixel_values = processor(images=image, return_tensors="pt").pixel_values
@@ -61,7 +60,6 @@ def extract_text_from_image(image):
         st.error(f"Error in extracting text from image: {e}")
         return None
 
-# Streamlit app
 def main():
     st.title("CAPTCHA Text Extractor")
     uploaded_file = st.file_uploader("Choose a CAPTCHA image...", type=["jpg", "jpeg", "png"])
