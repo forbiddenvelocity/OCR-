@@ -4,8 +4,8 @@ from PIL import Image
 import streamlit as st
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
-processor = TrOCRProcessor.from_pretrained('microsoft/trocr-base-printed')
-model = VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-base-printed')
+processor = TrOCRProcessor.from_pretrained('microsoft/trocr-base-handwritten')
+model = VisionEncoderDecoderModel.from_pretrained('microsoft/trocr-base-handwritten')
 
 def preprocess_image(image):
     try:
