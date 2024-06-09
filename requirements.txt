@@ -3,4 +3,4 @@ transformers
 pillow
 torch
 pytesseract
-opencv-python
+opencv-python-headless
