@@ -2,7 +2,6 @@ import streamlit as st
 from PIL import Image
 import numpy as np
 import cv2
-import torch
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
 # Load the fine-tuned model
