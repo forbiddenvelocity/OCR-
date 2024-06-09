@@ -36,8 +36,8 @@ def create_dataset(captcha_folder, output_folder, label_file, annotation_json):
 
 # Example usage
 create_dataset(
-    captcha_folder="evaluation_data",
-    output_folder="processed_evaluation_images",
-    label_file="evaluationlabels.csv",
-    annotation_json="evaluation_annotations.json"
+    captcha_folder="train3",
+    output_folder="train3processed",
+    label_file="train2processedlabels.csv",
+    annotation_json="annotations3.json"
 )

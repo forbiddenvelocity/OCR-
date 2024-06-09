@@ -1,39 +1,45 @@
 import streamlit as st
 from PIL import Image
+import numpy as np
+import cv2
 import torch
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
 # Load the fine-tuned model
-model = VisionEncoderDecoderModel.from_pretrained("./results/final_model")
+model = VisionEncoderDecoderModel.from_pretrained("./results3/final_model")
 
-# Load the processor from the base model
+# Load the processor from the base TrOCR model
 processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-handwritten")
 
 # Define the preprocessing function
 def preprocess_image(image):
-    image = image.convert("RGB")
-    return processor(image, return_tensors="pt").pixel_values
+    # Convert PIL Image to numpy array for processing
+    image_np = np.array(image.convert("RGB"))
+    
+    # Convert to grayscale
+    gray_image = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+    
+    # Noise reduction using Gaussian Blur
+    blurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+    
+    # Threshold to get binary image
+    _, binary_image = cv2.threshold(blurred_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    
+    # Morphological operations to clean up the image
+    kernel = np.ones((3, 3), np.uint8)
+    binary_image = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, kernel)
+    binary_image = cv2.dilate(binary_image, kernel, iterations=1)
+    binary_image = cv2.erode(binary_image, kernel, iterations=1)
+    
+    # Convert back to RGB PIL Image
+    processed_image = Image.fromarray(cv2.cvtColor(binary_image, cv2.COLOR_GRAY2RGB))
+    return processor(processed_image, return_tensors="pt").pixel_values
 
 # Define the function to extract text
-def extract_text_from_image(image):
-    pixel_values = preprocess_image(image)
+def extract_text_from_image(pixel_values):
     generated_ids = model.generate(pixel_values)
     generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
     return generated_text
-
-def post_process_text(text):
-    corrections = {
-        '8': 'B',
-        'B': '8',
-        'M': 'n',
-        'n': 'M',
-        'W': 'v',
-        'v': 'W',
-        'O': 'g',
-        # Add other common corrections here
-    }
-    corrected_text = ''.join(corrections.get(c, c) for c in text)
-    return corrected_text
 
 # Streamlit UI
 st.title("CAPTCHA Text Extractor")
@@ -45,5 +51,6 @@ if uploaded_file is not None:
     st.image(image, caption='Uploaded CAPTCHA Image', use_column_width=True)
     
     st.write("Processing...")
-    extracted_text = extract_text_from_image(image)
+    pixel_values = preprocess_image(image)
+    extracted_text = extract_text_from_image(pixel_values)
     st.write(f"Extracted Text: {extracted_text}")
