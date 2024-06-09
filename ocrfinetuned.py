@@ -15,8 +15,7 @@ processor = TrOCRProcessor.from_pretrained("microsoft/trocr-base-handwritten")
 def preprocess_image(image):
     # Convert PIL Image to numpy array for processing
     image_np = np.array(image.convert("RGB"))
-    
-    # Convert to grayscale
+
     gray_image = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
     
     # Noise reduction using Gaussian Blur
